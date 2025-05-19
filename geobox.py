@@ -41,25 +41,27 @@ i = 0
 feed = '# Generated with GeoBox (https://github.com/FrumentumNL/GeoBox) on ' + datetime.now().isoformat() + '\n'
 for entry in prefixes:
     fields = entry['custom_fields']
-    if fields['geoloc_has_location'] == True:
-        country = fields['geoloc_country']
-        region = fields['geoloc_region']
-        city = fields['geoloc_city']
-        if country is None and region is None and city is None:
-            # Just let it inherit
-            continue
+    has_location = fields.get('geoloc_has_location')
 
-        country = '' if country is None else country
-        region = '' if region is None else region
-        city = '' if city is None else city
-    
-        feed += entry['prefix'] + ',' + country + ',' + region + ',' + city + ',\n'
-        i += 1
-        
-    elif fields['geoloc_has_location'] == None:
+    if has_location is False:
         # Explicitly no geoloc, all fields should be empty
         feed += entry['prefix'] + ',,,,\n'
         i += 1
+        continue
+
+    country = fields.get('geoloc_country')
+    region = fields.get('geoloc_region')
+    city = fields.get('geoloc_city')
+    if country is None and region is None and city is None:
+        # Just let it inherit
+        continue
+
+    country = '' if country is None else country
+    region = '' if region is None else region
+    city = '' if city is None else city
+
+    feed += entry['prefix'] + ',' + country + ',' + region + ',' + city + ',\n'
+    i += 1
 
 print('Geofeed built, contains ' + str(i) + ' prefixes')
 
